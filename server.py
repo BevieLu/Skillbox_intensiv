@@ -24,6 +24,10 @@ class ClientProtocol(asyncio.Protocol):
                 self.login = decoded.replace("login:", "").replace("\r\n", "")
                 
                 
+                #Проходим по списку подключенных,
+                #Если находим одинаковые логины,
+                #то пишем сообщение: имя уже занято
+                #Иначе, приветствуем и выводим список из 10 последних сообщений.
                 i = 0
                 for client in self.server.clients:
                     #self.transport.write(client.login)
@@ -39,6 +43,7 @@ class ClientProtocol(asyncio.Protocol):
                     self.transport.write(
                         f"Привет, {self.login}!\n".encode()
                     )
+                    #Показываем последние 10 сообщений
                     self.send_history()
         else:
             self.send_message(decoded)
@@ -46,15 +51,18 @@ class ClientProtocol(asyncio.Protocol):
     def send_message(self, message):
         format_string = f"{self.login}: {message}"
         encoded = format_string.encode()
+        
+        #Записываем в список сообщение для историии
         self.save_history(format_string)
         
         for client in self.server.clients:
             if client.login != self.login:
                 client.transport.write(encoded)
     
+    #Функция записи сообщения
     def save_history(self, message):
         self.server.history.append(message)
-    
+    #Функция вывода последних 10 сообщений
     def send_history(self):
         self.transport.write(
             f"10 последних сообщений!".encode()
