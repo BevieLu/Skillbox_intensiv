@@ -38,6 +38,9 @@ class ClientProtocol(asyncio.Protocol):
                         f"Имя, {self.login} уже занято\n".encode()
                     )
                     self.login = None
+                    self.transport.write(
+                        f"Попробуй другой\n".encode()
+                    )
                     #self.server.clients.remove(self)
                 else:
                     self.transport.write(
