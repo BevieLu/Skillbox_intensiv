@@ -65,7 +65,7 @@ class ClientProtocol(asyncio.Protocol):
     #Функция вывода последних 10 сообщений
     def send_history(self):
         self.transport.write(
-            f"10 последних сообщений!".encode()
+            f"10 последних сообщений!\n".encode()
         )
         if len(self.server.history) >= 1:
             for mes in self.server.history[-10::1]:
@@ -74,19 +74,28 @@ class ClientProtocol(asyncio.Protocol):
                 )
         else:
             self.transport.write(
-                f"Сообщений после перезапуска сервера нет\n".encode()
+                f"\nСообщений пока не было\n".encode()
+            )
+    #Функция вывода списка участников чата
+    def clients_list(self):
+        self.transport.write(
+            f"Список Участников чата: \n".encode()
+        )
+        if len(self.server.clients) >= 1:
+            for client in self.server.clients:
+                if client.login != None:
+                    self.transport.write(
+                        f"> {client.login} \n".encode()
+                    )
+        else:
+            self.transport.write(
+                f"Вы первый участник чата\n".encode()
             )
     
     def connection_made(self, transport: transports.Transport):
         self.transport = transport
-        self.transport.write(
-            f"Список Участников чата: \n".encode()
-        )
-        for client in self.server.clients:
-            if client.login != None:
-                self.transport.write(
-                    f"> {client.login} \n".encode()
-                )
+        #Вывод участников чата
+        self.clients_list()
         self.server.clients.append(self)
         self.transport.write(
                         f"Введи логин\n".encode()
